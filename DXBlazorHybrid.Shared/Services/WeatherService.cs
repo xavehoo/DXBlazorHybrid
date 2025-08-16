@@ -9,7 +9,7 @@ public class WeatherService
 
     public async Task<WeatherResult?> GetWeatherAsync(double latitude, double longitude)
     {
-        var url = $"https://api.open-meteo.com/v1/forecast?latitude={latitude.ToString(CultureInfo.InvariantCulture)}&longitude={longitude.ToString(CultureInfo.InvariantCulture)}&current_weather=true";
+        var url = $"https://api.open-meteo.com/v1/forecast?latitude={latitude.ToString(CultureInfo.InvariantCulture)}&longitude={longitude.ToString(CultureInfo.InvariantCulture)}&current_weather=true&timezone=Europe/Rome";
         return await _httpClient.GetFromJsonAsync<WeatherResult>(url);
     }
 }

@@ -4,26 +4,30 @@
 @inject WeatherService WeatherService
 @inject ILocationService LocationService
 @inject HttpClient Http
+@inject IJSRuntime JS
 
 <PageTitle>Meteo</PageTitle>
 
 <h1>Meteo</h1>
 
 <div style="display: flex; align-items: center; gap: 8px;">
-    <DxComboBox Data="@locations"
+    <DxComboBox @ref="comboRef"
+                TData="Location"
+                TValue="string"
+                Data="@locations"
                 TextFieldName="name"
                 ValueFieldName="uniqueId"
                 @bind-Value="selectedLocationId"
                 AllowUserInput="true"
-                TextChanged="OnTextChanged"
                 ShowClearButton="true"
                 Placeholder="Cerca città..."
                 DropDownStyle="DropDownList"
-                Width="250px">
+                Width="250px"
+                InputCssClass="combo-search-input">
         <ItemTemplate Context="item">
             <div>
-                <b>@((item as Location)?.name)</b>
-                <span style="font-size:smaller;">@((item as Location)?.country) (@((item as Location)?.latitude.ToString("F2")), @((item as Location)?.longitude.ToString("F2")))</span>
+                <b>@item.name</b>
+                <span style="font-size:smaller;">@item.country (@item.latitude.ToString("F2"), @item.longitude.ToString("F2"))</span>
             </div>
         </ItemTemplate>
     </DxComboBox>
@@ -46,10 +50,27 @@ else if (error != null)
 }
 
 @code {
+    private DxComboBox<Location, string> comboRef;
+    private DotNetObjectReference<Weather> objRef;
     private List<Location> locations = new();
     private CancellationTokenSource debounceCts;
     WeatherResult? weather;
     string? error;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("attachComboInput", null, objRef); // Passa null, lo script JS trova l'input
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnComboInputChanged(string value)
+    {
+        await OnTextChanged(value);
+    }
 
     private async Task OnTextChanged(string newText)
     {
@@ -58,7 +79,7 @@ else if (error != null)
 
         try
         {
-            await Task.Delay(500, debounceCts.Token); // debounce di 500ms
+            await Task.Delay(1000, debounceCts.Token); // debounce di 500ms
             var url = $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(newText)}&count=10&language=it&format=json";
             var response = await Http.GetFromJsonAsync<GeoResponse>(url);
             locations = response?.results?.Select(r => {

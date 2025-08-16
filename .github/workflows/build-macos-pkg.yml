@@ -1,0 +1,45 @@
+name: Build macOS .pkg
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-macos-pkg:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Install MAUI Workload
+        run: dotnet workload install maui
+
+      - name: Restore NuGet packages
+        run: dotnet restore DXBlazorHybrid/DXBlazorHybrid.csproj
+
+      - name: Build for MacCatalyst
+        run: dotnet build DXBlazorHybrid/DXBlazorHybrid.csproj -c Release -f net9.0-maccatalyst
+
+      - name: Publish for MacCatalyst
+        run: dotnet publish DXBlazorHybrid/DXBlazorHybrid.csproj -c Release -f net9.0-maccatalyst -o publish-maccatalyst
+
+      - name: Install dotnet-maui-pkg tool
+        run: dotnet tool install -g dotnet-maui-pkg
+
+      - name: Create .pkg installer
+        run: |
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet maui-pkg publish-maccatalyst/DXBlazorHybrid.app --output DXBlazorHybrid.pkg
+
+      - name: Upload .pkg artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DXBlazorHybrid-macOS-pkg
+          path: DXBlazorHybrid.pkg

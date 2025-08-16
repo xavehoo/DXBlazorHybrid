@@ -24,7 +24,19 @@
     <div id="app">Loading...</div>
 
     <script src="_framework/blazor.webview.js" autostart="false"></script>
+    <script>
+        window.attachComboInput = function (_, dotNetRef) {
+            console.log("ss");
+            // Cerca l'input della combobox tramite la classe custom
+            var input = document.querySelector('input.combo-search-input');
+            if (input) {
+                input.addEventListener('input', function (e) {
+                    dotNetRef.invokeMethodAsync('OnComboInputChanged', input.value);
+                });
+            }
+        };
+        </script>
 
 </body>
 
-</html>
+</html></html>
