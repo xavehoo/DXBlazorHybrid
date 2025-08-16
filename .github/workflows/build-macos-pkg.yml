@@ -22,7 +22,10 @@ jobs:
         run: dotnet workload install maui
 
       - name: Add DevExpress NuGet feed
-        run: dotnet nuget add source "https://nuget.devexpress.com/${{ secrets.DEVEXPRESS_KEY }}/nuget" --name DevExpress --username anything --password ${{ secrets.DEVEXPRESS_KEY }} --store-password-in-clear-text
+        run: dotnet nuget add source "https://nuget.devexpress.com/${{ secrets.DEVEXPRESS_KEY }}/api/v3/index.json" --name DevExpress --username anything --password ${{ secrets.DEVEXPRESS_KEY }} --store-password-in-clear-text
+
+      - name: List NuGet sources
+        run: dotnet nuget list source
 
       - name: Restore NuGet packages
         run: dotnet restore DXBlazorHybrid/DXBlazorHybrid.csproj
