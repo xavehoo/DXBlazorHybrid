@@ -26,12 +26,22 @@ jobs:
 
       - name: Build for MacCatalyst
         run: dotnet build DXBlazorHybrid/DXBlazorHybrid.csproj -c Release -f net9.0-maccatalyst
+        
+      # Pulizia cartella di output
+      - name: Clean output folder
+        run: rm -rf publish-maccatalyst
 
       - name: Publish for MacCatalyst
         run: dotnet publish DXBlazorHybrid/DXBlazorHybrid.csproj -c Release -f net9.0-maccatalyst -o publish-maccatalyst
 
       - name: Install dotnet-maui-pkg tool
         run: dotnet tool install -g dotnet-maui-pkg
+
+      # Verifica tool installato
+      - name: Check maui-pkg tool version
+        run: |
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet maui-pkg --version
 
       - name: Create .pkg installer
         run: |
@@ -43,3 +53,9 @@ jobs:
         with:
           name: DXBlazorHybrid-macOS-pkg
           path: DXBlazorHybrid.pkg
+
+      # Pubblica come release GitHub
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: DXBlazorHybrid.pkg
