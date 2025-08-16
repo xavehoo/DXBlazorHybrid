@@ -1,0 +1,135 @@
+﻿@page "/weather"
+@using DXBlazorHybrid.Shared.Services
+@using DevExpress.Blazor
+@inject WeatherService WeatherService
+@inject ILocationService LocationService
+@inject HttpClient Http
+
+<PageTitle>Meteo</PageTitle>
+
+<h1>Meteo</h1>
+
+<div style="display: flex; align-items: center; gap: 8px;">
+    <DxComboBox Data="@locations"
+                TextFieldName="name"
+                ValueFieldName="uniqueId"
+                @bind-Value="selectedLocationId"
+                AllowUserInput="true"
+                TextChanged="OnTextChanged"
+                ShowClearButton="true"
+                Placeholder="Cerca città..."
+                DropDownStyle="DropDownList"
+                Width="250px">
+        <ItemTemplate Context="item">
+            <div>
+                <b>@((item as Location)?.name)</b>
+                <span style="font-size:smaller;">@((item as Location)?.country) (@((item as Location)?.latitude.ToString("F2")), @((item as Location)?.longitude.ToString("F2")))</span>
+            </div>
+        </ItemTemplate>
+    </DxComboBox>
+    <DxButton Click="GetWeatherByLocation" RenderStyle="ButtonRenderStyle.Secondary" IconCssClass="dx-icon-map" />
+</div>
+
+@if (weather != null)
+{
+    <div class="weather-data">
+        <p><b>Temperatura:</b> @weather.current_weather?.temperature °C</p>
+        <p><b>Vento:</b> @weather.current_weather?.windspeed km/h</p>
+        <p><b>Direzione vento:</b> @weather.current_weather?.winddirection °</p>
+        <p><b>Codice meteo:</b> @weather.current_weather?.weathercode</p>
+        <p><b>Ora:</b> @weather.current_weather?.time</p>
+    </div>
+}
+else if (error != null)
+{
+    <p style="color:red">@error</p>
+}
+
+@code {
+    private List<Location> locations = new();
+    private CancellationTokenSource debounceCts;
+    WeatherResult? weather;
+    string? error;
+
+    private async Task OnTextChanged(string newText)
+    {
+        debounceCts?.Cancel();
+        debounceCts = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(500, debounceCts.Token); // debounce di 500ms
+            var url = $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(newText)}&count=10&language=it&format=json";
+            var response = await Http.GetFromJsonAsync<GeoResponse>(url);
+            locations = response?.results?.Select(r => {
+                r.uniqueId = $"{r.latitude:F6}_{r.longitude:F6}";
+                return r;
+            }).ToList() ?? new List<Location>();
+            error = null;
+            StateHasChanged();
+        }
+        catch (TaskCanceledException) { /* ignorato */ }
+        catch (Exception ex)
+        {
+            error = $"Errore chiamata API: {ex.Message}";
+            locations = new();
+            StateHasChanged();
+        }
+    }
+
+    private string _selectedLocationId;
+    private string selectedLocationId
+    {
+        get => _selectedLocationId;
+        set
+        {
+            if (_selectedLocationId != value)
+            {
+                _selectedLocationId = value;
+                _ = OnLocationSelectedAsync(_selectedLocationId);
+            }
+        }
+    }
+
+    private async Task OnLocationSelectedAsync(string id)
+    {
+        if (!string.IsNullOrEmpty(id) && locations != null)
+        {
+            var selected = locations.FirstOrDefault(x => x.uniqueId == id);
+            if (selected != null)
+            {
+                weather = await WeatherService.GetWeatherAsync(selected.latitude, selected.longitude);
+                error = null;
+                StateHasChanged();
+            }
+        }
+    }
+
+    async Task GetWeatherByLocation()
+    {
+        error = null;
+        var location = await LocationService.GetCurrentLocationAsync();
+        if (location == null)
+        {
+            error = "Impossibile ottenere la posizione.";
+            weather = null;
+            return;
+        }
+        weather = await WeatherService.GetWeatherAsync(location.Latitude.GetValueOrDefault(), location.Longitude.GetValueOrDefault());
+    }
+
+    public class GeoResponse
+    {
+        public List<Location> results { get; set; }
+    }
+
+    public class Location
+    {
+        public int id { get; set; }
+        public double latitude { get; set; }
+        public double longitude { get; set; }
+        public string name { get; set; }
+        public string country { get; set; }
+        public string uniqueId { get; set; }
+    }
+}
