@@ -48,16 +48,16 @@ jobs:
       # - name: Install dotnet-maui-pkg tool
       #   run: dotnet tool install -g dotnet-maui-pkg
 
-      # Verifica tool installato
-      - name: Check maui-pkg tool version
-        run: |
-          export PATH="$PATH:$HOME/.dotnet/tools"
-          dotnet maui-pkg --version
+      # # Verifica tool installato
+      # - name: Check maui-pkg tool version
+      #   run: |
+      #     export PATH="$PATH:$HOME/.dotnet/tools"
+      #     dotnet maui-pkg --version
 
       - name: Create .pkg installer
         run: |
-          export PATH="$PATH:$HOME/.dotnet/tools"
-          dotnet maui-pkg publish-maccatalyst/DXBlazorHybrid.app --output DXBlazorHybrid.pkg
+          pkgbuild --install-location /Applications \
+          --component publish-maccatalyst/DXBlazorHybrid.app \DXBlazorHybrid.pkg
 
       - name: Upload .pkg artifact
         uses: actions/upload-artifact@v4
