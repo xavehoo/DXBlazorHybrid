@@ -36,14 +36,14 @@ jobs:
         run: dotnet restore DXBlazorHybrid/DXBlazorHybrid.csproj
 
       - name: Build for MacCatalyst
-        run: dotnet build DXBlazorHybrid/DXBlazorHybrid.csproj -c Release -f net9.0-maccatalyst
+        run: dotnet build DXBlazorHybrid/DXBlazorHybrid.csproj -c Release -f net9.0-maccatalyst -p:RuntimeIdentifier=maccatalyst-x64
         
       # Pulizia cartella di output
       - name: Clean output folder
         run: rm -rf publish-maccatalyst
 
       - name: Publish for MacCatalyst
-        run: dotnet publish DXBlazorHybrid/DXBlazorHybrid.csproj -c Release -f net9.0-maccatalyst -o publish-maccatalyst
+        run: dotnet publish DXBlazorHybrid/DXBlazorHybrid.csproj -c Release -f net9.0-maccatalyst -o publish-maccatalyst -p:RuntimeIdentifier=maccatalyst-x64
 
       - name: Install dotnet-maui-pkg tool
         run: dotnet tool install -g dotnet-maui-pkg
