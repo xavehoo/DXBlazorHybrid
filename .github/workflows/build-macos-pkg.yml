@@ -45,8 +45,8 @@ jobs:
       - name: Publish for MacCatalyst
         run: dotnet publish DXBlazorHybrid/DXBlazorHybrid.csproj -c Release -f net9.0-maccatalyst -o publish-maccatalyst -p:RuntimeIdentifier=maccatalyst-x64
 
-      - name: Install dotnet-maui-pkg tool
-        run: dotnet tool install -g dotnet-maui-pkg
+      # - name: Install dotnet-maui-pkg tool
+      #   run: dotnet tool install -g dotnet-maui-pkg
 
       # Verifica tool installato
       - name: Check maui-pkg tool version
