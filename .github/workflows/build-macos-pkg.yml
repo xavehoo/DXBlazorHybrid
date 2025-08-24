@@ -50,6 +50,14 @@ jobs:
               -p:RuntimeIdentifier=maccatalyst-x64 \
               -o publish-maccatalyst
 
+      - name: List publish output
+        run: find publish-maccatalyst
+
+      - name: Find .app bundle
+        run: find . -name "*.app"
+
+      - name: Copy .app to publish-maccatalyst
+        run: cp -R DXBlazorHybrid/bin/Release/net9.0-maccatalyst/maccatalyst-x64/DXBlazorHybrid.app publish-maccatalyst/
       # - name: Install dotnet-maui-pkg tool
       #   run: dotnet tool install -g dotnet-maui-pkg
 
