@@ -48,8 +48,8 @@ jobs:
               -c Release \
               -f net9.0-maccatalyst \
               -p:RuntimeIdentifier=maccatalyst-x64 \
-              -p:PublishAot=true \
-              # -p:UseAppHost=true \
+              # -p:PublishAot=true \
+              -p:UseAppHost=true \
               -o publish-maccatalyst
 
       # - name: Install dotnet-maui-pkg tool
