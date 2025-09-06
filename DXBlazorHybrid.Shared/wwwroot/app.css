@@ -68,3 +68,14 @@ h1:focus {
     -webkit-mask-image: var(--icon-mask-image);
     mask-image: var(--icon-mask-image);
 }
+
+.medium-button {
+    min-width: 32px;
+    min-height: 32px;
+    font-size: 1.5rem;
+}
+
+.medium-icon {
+    font-size: 1.25rem !important;
+    vertical-align: middle;
+}
