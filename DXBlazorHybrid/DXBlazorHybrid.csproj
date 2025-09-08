@@ -11,6 +11,8 @@
     <EnableDefaultCssItems>false</EnableDefaultCssItems>
     <Nullable>enable</Nullable>
 
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+
     <!-- Display name -->
     <ApplicationTitle>DXBlazorHybrid</ApplicationTitle>
 
@@ -70,6 +72,19 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
   </ItemGroup>
+
+    <!-- Fix for MacCatalyst: include static files as Content -->
+    <ItemGroup>
+      <Content Include="wwwroot/**">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Components/**">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Properties/launchSettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DXBlazorHybrid.Shared\DXBlazorHybrid.Shared.csproj" />
