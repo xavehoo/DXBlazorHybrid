@@ -1,6 +1,7 @@
 ﻿@page "/weather"
 @using DXBlazorHybrid.Shared.Services
 @using DevExpress.Blazor
+@using System.Globalization
 @inject WeatherService WeatherService
 @inject ILocationService LocationService
 @inject HttpClient Http
@@ -37,12 +38,20 @@
 @if (weather != null)
 {
     <div class="weather-data">
+        <p><b>Latitudine:</b> @currentLat?.ToString("F6", CultureInfo.InvariantCulture)</p>
+        <p><b>Longitudine:</b> @currentLon?.ToString("F6", CultureInfo.InvariantCulture)</p>
         <p><b>Temperatura:</b> @weather.current_weather?.temperature °C</p>
         <p><b>Vento:</b> @weather.current_weather?.windspeed km/h</p>
         <p><b>Direzione vento:</b> @weather.current_weather?.winddirection °</p>
         <p><b>Codice meteo:</b> @weather.current_weather?.weathercode</p>
         <p><b>Ora:</b> @weather.current_weather?.time</p>
     </div>
+    @if (RadarUrl != null)
+    {
+        <div class="radar-widget" style="margin-top:1rem;">
+            <iframe src="@RadarUrl" width="400" height="400" style="border:0;" allowfullscreen loading="lazy"></iframe>
+        </div>
+    }
 }
 else if (error != null)
 {
@@ -56,6 +65,8 @@ else if (error != null)
     private CancellationTokenSource debounceCts;
     WeatherResult? weather;
     string? error;
+    double? currentLat;
+    double? currentLon;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -119,6 +130,8 @@ else if (error != null)
             var selected = locations.FirstOrDefault(x => x.uniqueId == id);
             if (selected != null)
             {
+                currentLat = selected.latitude;
+                currentLon = selected.longitude;
                 weather = await WeatherService.GetWeatherAsync(selected.latitude, selected.longitude);
                 error = null;
                 StateHasChanged();
@@ -136,8 +149,15 @@ else if (error != null)
             weather = null;
             return;
         }
-        weather = await WeatherService.GetWeatherAsync(location.Latitude.GetValueOrDefault(), location.Longitude.GetValueOrDefault());
+        currentLat = location.Latitude.GetValueOrDefault();
+        currentLon = location.Longitude.GetValueOrDefault();
+        weather = await WeatherService.GetWeatherAsync(currentLat.Value, currentLon.Value);
     }
+
+    private string? RadarUrl =>
+        (currentLat != null && currentLon != null)
+            ? $"https://www.rainviewer.com/map.html?loc={currentLat.Value.ToString("F6", CultureInfo.InvariantCulture)},{currentLon.Value.ToString("F6", CultureInfo.InvariantCulture)},7&oFa=0&oC=0&oU=0&oCS=0&oF=0&oAP=0&c=3&o=83&lm=1&layer=radar&sm=1&sn=1"
+            : null;
 
     public class GeoResponse
     {
