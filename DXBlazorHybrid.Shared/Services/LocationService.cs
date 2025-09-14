@@ -3,6 +3,7 @@
 public interface ILocationService
 {
     Task<LocationDto?> GetCurrentLocationAsync();
+    string? LastError { get; }
 }
 
 public class LocationDto

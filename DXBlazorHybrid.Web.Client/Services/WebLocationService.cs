@@ -4,9 +4,11 @@ namespace DXBlazorHybrid.Web.Client.Services;
 
 public class WebLocationService : ILocationService
 {
+    public string? LastError { get; private set; }
+
     public Task<LocationDto?> GetCurrentLocationAsync()
     {
-        // Stub: WebAssembly non supporta Geolocation nativamente qui
+        LastError = "La geolocalizzazione non è supportata su questa piattaforma.";
         return Task.FromResult<LocationDto?>(null);
     }
 }

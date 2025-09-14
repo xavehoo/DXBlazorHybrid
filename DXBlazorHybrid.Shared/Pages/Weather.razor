@@ -150,7 +150,7 @@ else if (error != null)
         var location = await LocationService.GetCurrentLocationAsync();
         if (location == null)
         {
-            error = "Impossibile ottenere la posizione.";
+            error = LocationService.LastError ?? "Impossibile ottenere la posizione.";
             weather = null;
             return;
         }
