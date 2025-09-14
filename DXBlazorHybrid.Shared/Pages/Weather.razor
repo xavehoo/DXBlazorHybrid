@@ -75,6 +75,11 @@ else if (error != null)
             objRef = DotNetObjectReference.Create(this);
             await JS.InvokeVoidAsync("attachComboInput", null, objRef); // Passa null, lo script JS trova l'input
         }
+
+        if (RadarUrl != null)
+        {
+            await JS.InvokeVoidAsync("renderRadarIframe", RadarUrl);
+        }
     }
 
     [JSInvokable]

@@ -36,7 +36,23 @@
                 });
             }
         };
-        </script>
+
+        window.renderRadarIframe = function (url) {
+            requestAnimationFrame(() => {
+                const container = document.getElementById("radar-container");
+                if (container) {
+                    const iframe = document.createElement("iframe");
+                    iframe.src = url;
+                    iframe.width = "400";
+                    iframe.height = "400";
+                    iframe.style.border = "0";
+                    iframe.loading = "lazy";
+                    iframe.allowFullscreen = true;
+                    container.appendChild(iframe);
+                }
+            });
+        };
+    </script>
 
 </body>
 
